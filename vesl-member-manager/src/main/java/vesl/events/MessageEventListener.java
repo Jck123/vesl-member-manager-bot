@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -30,9 +31,22 @@ public class MessageEventListener extends ListenerAdapter {
             } else if (messageText.startsWith(",channelroleallow")) {
                 event.getChannel().sendMessage("You've entered ',channelroleallow'").queue();
                 ArrayList<ArrayList<Object>> results = parseOptions(messageText, event.getGuild());
-                System.out.println("===== [ RESULTS ] =====");
-                for (Object o : results.get(0))
-                    System.out.println(o);
+                System.out.println("===== [ RESULTS  ] =====");
+                System.out.println("----- [  ROLES   ] -----");
+                if (results.get(0) != null) {
+                    for (Object o : results.get(0)) {
+                        System.out.println(o.getClass().getSimpleName() + " | " + o);
+                    }
+                }
+                System.out.println("----- [ CHANNELS ] -----");
+                if (results.get(2) != null) {
+                    for (Object o : results.get(2)) {
+                        if (o.getClass().equals(String.class))
+                            System.out.println(o.toString());
+                        else
+                            System.out.println(o.getClass().getSimpleName()  + " | " + ((GuildChannel)o).getName());
+                    }
+                }
             } else if (messageText.startsWith(",channelroledeny")) {
                 event.getChannel().sendMessage("You've entered ',channelroledeny'").queue();
             } else if (messageText.startsWith(",channelroleclear")) {
@@ -50,7 +64,7 @@ public class MessageEventListener extends ListenerAdapter {
         Pattern p = Pattern.compile("([^\\s]+)?(\\s)+");
         final Matcher matcher = p.matcher(strOptions);
 
-        if (countMatches(strOptions, "role:") == 1) {
+        if (countMatches(strOptions, "role:") == 1) {   //Parses roles and users from message
             int start = strOptions.indexOf("role:") + 5;
             ArrayList<Object> parsedRoles = new ArrayList<Object>();
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
@@ -88,7 +102,33 @@ public class MessageEventListener extends ListenerAdapter {
         }
 
         if (countMatches(strOptions, "include:") == 1 ^ countMatches(strOptions, "exclude:") == 1) {
-            System.out.println("Channels found!");
+            ArrayList<Object> parsedChannels = new ArrayList<Object>();
+            int start = strOptions.indexOf("clude:") + 6;
+            parsedChannels.add(strOptions.substring(start - 8, start - 1));
+
+            if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
+                start = strOptions.indexOf('{', start) + 1;
+                int end = strOptions.indexOf('}', start);
+                List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));
+                for(String s : tempList) {
+                    s = s.trim();
+                    if (!s.startsWith("<#"))
+                        continue;
+
+                    parsedChannels.add(guild.getGuildChannelById(s.substring(2, s.length() - 1)));
+                }
+            
+            } else {                //Parse singular entry
+                matcher.find(start);
+                start = matcher.end();
+                int end = strOptions.indexOf(' ', start);
+                if (end == -1) end = strOptions.length();
+                String strChannel = strOptions.substring(start, end).trim();
+                if (strChannel.startsWith("<#")) {
+                    parsedChannels.add(guild.getGuildChannelById(strChannel.substring(2, strChannel.length() - 1)));
+                }
+            }
+            options.set(2, parsedChannels);
         }
 
         if (countMatches(strOptions, "conditional:") == 1) {

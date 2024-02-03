@@ -73,7 +73,7 @@ public class MessageEventListener extends ListenerAdapter {
                 List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));
                 for(String s : tempList) {
                     s = s.trim();
-                    if (!s.startsWith("<@"))
+                    if (!s.startsWith("<@"))            //Skip if not role or user(all of them start with this)
                         continue;
                     if (s.charAt(2) == '&')     //Indicates Role
                         parsedRoles.add(guild.getRoleById(s.substring(3, s.length() - 1)));
@@ -82,57 +82,57 @@ public class MessageEventListener extends ListenerAdapter {
                 }
             
             } else {                //Parse singular entry
-                matcher.find(start);
+                matcher.find(start);                            //Tries to find next non-whitespace after option indicator("role:")
                 start = matcher.end();
-                int end = strOptions.indexOf(' ', start);
+                int end = strOptions.indexOf(' ', start);       //Tries to find the next space OR end of string
                 if (end == -1) end = strOptions.length();
                 String strRole = strOptions.substring(start, end).trim();
-                if (strRole.startsWith("<@")) {
-                    if (strRole.charAt(2) == '&')
+                if (strRole.startsWith("<@")) {         //Skip if not role or user(all of them start with this)
+                    if (strRole.charAt(2) == '&')       //Indicates Role
                         parsedRoles.add(guild.getRoleById(strRole.substring(3, strRole.length() - 1)));
-                    else
+                    else                                //Indicates User
                         parsedRoles.add(guild.retrieveMemberById(strRole.substring(2, strRole.length() - 1)).complete());
                 }
             }
-            options.set(0, parsedRoles);
+            options.set(0, parsedRoles);                //Sends off the ArrayList in a package with a cute lil bow
         }
 
         if (countMatches(strOptions, "perm:") == 1) {
-            System.out.println("Perms found!");
+
         }
 
+        //Parses any channels if either include xor exclude are found
         if (countMatches(strOptions, "include:") == 1 ^ countMatches(strOptions, "exclude:") == 1) {
             ArrayList<Object> parsedChannels = new ArrayList<Object>();
-            int start = strOptions.indexOf("clude:") + 6;
-            parsedChannels.add(strOptions.substring(start - 8, start - 1));
+            int start = strOptions.indexOf("clude:") + 6;       //Looks for where the channels begin(both conveiniently end in "clude:")
+            parsedChannels.add(strOptions.substring(start - 8, start - 1));     //First object in this ArrList indicates if this is exclusionary or inclusionary
 
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
                 start = strOptions.indexOf('{', start) + 1;
                 int end = strOptions.indexOf('}', start);
-                List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));
-                for(String s : tempList) {
-                    s = s.trim();
-                    if (!s.startsWith("<#"))
-                        continue;
+                List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
+                for(String s : tempList) {                          //Parses each new seperate string
+                    s = s.trim();                                   //Removes extra whitespaces
+                    if (!s.startsWith("<#")) continue;              //Verifies it's a channel, skips otherwise
 
-                    parsedChannels.add(guild.getGuildChannelById(s.substring(2, s.length() - 1)));
+                    parsedChannels.add(guild.getGuildChannelById(s.substring(2, s.length() - 1)));  //Adds to list as a GuildChannel object
                 }
             
             } else {                //Parse singular entry
-                matcher.find(start);
+                matcher.find(start);    //Finds next non-whitespace character
                 start = matcher.end();
-                int end = strOptions.indexOf(' ', start);
+                int end = strOptions.indexOf(' ', start);   //Finds next whitespace OR end of string
                 if (end == -1) end = strOptions.length();
                 String strChannel = strOptions.substring(start, end).trim();
-                if (strChannel.startsWith("<#")) {
+                if (strChannel.startsWith("<#"))        //Verifies it's a channel, skips otherwise
                     parsedChannels.add(guild.getGuildChannelById(strChannel.substring(2, strChannel.length() - 1)));
-                }
             }
-            options.set(2, parsedChannels);
+            options.set(2, parsedChannels);         //Sends off the ArrayList in a package with a cute lil bow
         }
 
         if (countMatches(strOptions, "conditional:") == 1) {
-            System.out.println("Conditionals found!");
+            //System.out.println("Conditionals found!");
+            //To be implmented later
         }
         
         return options;

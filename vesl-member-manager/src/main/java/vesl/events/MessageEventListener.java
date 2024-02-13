@@ -25,11 +25,10 @@ public class MessageEventListener extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         String messageText = event.getMessage().getContentRaw();
-        //event.getChannel().sendMessage(messageText).queue();
         if (messageText.startsWith(",")) {
             event.getMessage().addReaction(Emoji.fromUnicode("U+2611")).queue();
 
-            //Boolean channelInverse = messageText.contains("-ci") ? true : false;
+            Boolean channelInverse = messageText.contains("-ci") ? true : false;
 
             if (messageText.startsWith(",help")) {
                 event.getChannel().sendMessage("You've entered ',help'").queue();
@@ -42,8 +41,7 @@ public class MessageEventListener extends ListenerAdapter {
                 if (results.get(0) != null) {
                     //System.out.println("Roles length" + results.get(0).size());
                     for (Object o : results.get(0)) {
-                        //System.out.println(o == null);
-                        System.out.println(o.getClass().getSimpleName() + " | " + o);
+                        //System.out.println(o.getClass().getSimpleName() + " | " + o);
                         output += o.getClass().getSimpleName() + " | " + o + "\n";
                     }
                 }
@@ -80,8 +78,8 @@ public class MessageEventListener extends ListenerAdapter {
                     }
                 }
                 event.getChannel().sendMessage(output).queue();
-            } else if (messageText.startsWith(",channelroledeny")) {
-                event.getChannel().sendMessage("You've entered ',channelroledeny'").queue();
+            //} else if (messageText.startsWith(",channelroledeny")) {
+                //event.getChannel().sendMessage("You've entered ',channelroledeny'").queue();
                 //RoleManager manager = event.getGuild().getRoleById(1205225542882951300L).getManager();
                 //manager.revokePermissions(Permission.VIEW_CHANNEL).queue();
                 //TextChannelManager channelM = event.getGuild().getTextChannelById(203282662608207872L).getManager();
@@ -90,13 +88,14 @@ public class MessageEventListener extends ListenerAdapter {
                 //channelM.putRolePermissionOverride(1205225542882951300L, allow, deny).queue();
                 //event.getGuild().getGuildChannelById(1205225542882951300L).getManager();
                 //System.out.println(Permission.valueOf("ADMINISTRATOR"));
-                
-                
-                
+            } else if (messageText.startsWith(",channelroleset")) {
+
+            } else if (messageText.startsWith(",channelroleadd")) {
+
             } else if (messageText.startsWith(",channelroleclear")) {
-                event.getChannel().sendMessage("You've entered ',channelroleclear'").queue();
+
             } else if (messageText.startsWith(",undo")) {
-                event.getChannel().sendMessage("You've entered ',undo'").queue();
+
             } else {
                 event.getChannel().sendMessage("Unrecognized command!\nType in ',help' to view available commands").queue();
             }

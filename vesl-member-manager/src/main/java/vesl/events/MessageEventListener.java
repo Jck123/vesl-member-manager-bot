@@ -268,8 +268,4 @@ public class MessageEventListener extends ListenerAdapter {
         }
         return counter;
     }
-    
-    private ArrayList<Object> parsePerms(String strOptions, int start) {
-        return null;
-    }
 }

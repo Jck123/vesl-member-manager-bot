@@ -1,7 +1,7 @@
 package vesl.events;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,47 +34,39 @@ public class MessageEventListener extends ListenerAdapter {
                 event.getChannel().sendMessage("You've entered ',help'").queue();
             } else if (messageText.startsWith(",debugparse")) {
                 String output = "";
-                ArrayList<ArrayList<Object>> results = parseOptions(messageText, event.getGuild());
-                //System.out.println("===== [ RESULTS  ] =====");
-                //System.out.println("----- [  ROLES   ] -----");
                 output += "===== [ RESULTS  ] =====\n----- [  ROLES   ] -----\n";
-                if (results.get(0) != null) {
-                    //System.out.println("Roles length" + results.get(0).size());
-                    for (Object o : results.get(0)) {
-                        //System.out.println(o.getClass().getSimpleName() + " | " + o);
-                        output += o.getClass().getSimpleName() + " | " + o + "\n";
+                HashSet<IMentionable> roles = parseRoles(messageText, event.getGuild());
+                if (roles != null) {
+                    for (IMentionable r : roles) {
+                        output += r.getClass().getSimpleName() + " | " + r + "\n";
                     }
                 }
-                //System.out.println("----- [ CHANNELS ] -----");
                 output += "----- [ CHANNELS ] -----\n";
-                if (results.get(1) != null) {
-                    for (Object o : results.get(1)) {
-                        //System.out.println(o.getClass().getSimpleName()  + " | " + ((GuildChannel)o).getName());
-                        output += o.getClass().getSimpleName()  + " | " + ((GuildChannel)o).getName() + "\n";
+                HashSet<GuildChannel> channels = parseChannels(messageText, event.getGuild());
+                if (channels != null) {
+                    for (GuildChannel c : channels) {
+                        output += c.getClass().getSimpleName()  + " | " + c.getName() + "\n";
                     }
                 }
-                //System.out.println("----- [  PERMS   ] -----");
                 output += "----- [  PERMS   ] -----\n";
-                if (results.get(2) != null) {
-                    for (Object o : results.get(2)) {
-                        //System.out.println(((Permission)o).getName());
-                        output += ((Permission)o).getName() + "\n";
+                HashSet<Permission> perms = parsePerms(messageText, 0);
+                if (perms != null) {
+                    for (Permission p : perms) {
+                        output += p.getName() + "\n";
                     }
                 }
-                //System.out.println("----- [  ALLOW   ] -----");
                 output += "----- [  ALLOW   ] -----\n";
-                if (results.get(3) != null) {
-                    for (Object o : results.get(3)) {
-                        //System.out.println(((Permission)o).getName());
-                        output += ((Permission)o).getName() + "\n";
+                HashSet<Permission> allow = parsePerms(messageText, 1);
+                if (allow != null) {
+                    for (Permission p : allow) {
+                        output += p.getName() + "\n";
                     }
                 }
-                //System.out.println("----- [   DENY   ] -----");
                 output += "----- [   DENY   ] -----\n";
-                if (results.get(4) != null) {
-                    for (Object o : results.get(4)) {
-                        //System.out.println(((Permission)o).getName());
-                        output += ((Permission)o).getName() + "\n";
+                HashSet<Permission> deny = parsePerms(messageText, 2);
+                if (deny != null) {
+                    for (Permission p : deny) {
+                        output += p.getName() + "\n";
                     }
                 }
                 event.getChannel().sendMessage(output).queue();
@@ -89,7 +81,14 @@ public class MessageEventListener extends ListenerAdapter {
                 //event.getGuild().getGuildChannelById(1205225542882951300L).getManager();
                 //System.out.println(Permission.valueOf("ADMINISTRATOR"));
             } else if (messageText.startsWith(",channelroleset")) {
+                //ArrayList<HashSet<Object>> details = parseOptions(messageText, event.getGuild());
+                //ArrayList<IMentionable> roles;
+                
 
+
+                //if (channelInverse) {
+                    
+                //}
             } else if (messageText.startsWith(",channelroleadd")) {
 
             } else if (messageText.startsWith(",channelroleclear")) {
@@ -102,14 +101,15 @@ public class MessageEventListener extends ListenerAdapter {
         }
     }
 
-    private ArrayList<ArrayList<Object>> parseOptions(String strOptions, Guild guild) {
-        ArrayList<ArrayList<Object>> options = new ArrayList<ArrayList<Object>>(Arrays.asList(null, null, null, null, null, null));
+    private HashSet<IMentionable> parseRoles(String strOptions, Guild guild) {
+        if (countMatches(strOptions, "role:") != 1)
+            return null;
+        
         Pattern p = Pattern.compile("([^\\s]+)?(\\s)+");
         final Matcher matcher = p.matcher(strOptions);
 
-        if (countMatches(strOptions, "role:") == 1) {   //Parses roles and users from message
-            int start = strOptions.indexOf("role:") + 5;
-            ArrayList<Object> parsedRoles = new ArrayList<Object>();
+        int start = strOptions.indexOf("role:") + 5;
+            HashSet<IMentionable> parsedRoles = new HashSet<IMentionable>();
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
                 start = strOptions.indexOf('{', start) + 1;
                 int end = strOptions.indexOf('}', start);
@@ -163,12 +163,18 @@ public class MessageEventListener extends ListenerAdapter {
                 if (mention != null)    //Make sure mention actually has a user or role(don't add null values)
                     parsedRoles.add(mention);
             }
-            options.set(0, parsedRoles);                //Sends off the ArrayList in a package with a cute lil bow
-        }
+            
+            return parsedRoles;
+    }
 
-        //Parses any channels if the keyword is found
-        if (countMatches(strOptions, "channel:") == 1) {
-            ArrayList<Object> parsedChannels = new ArrayList<Object>();
+    private HashSet<GuildChannel> parseChannels(String strOptions, Guild guild) {
+        if (countMatches(strOptions, "channel:") != 1)
+            return null;
+
+            Pattern p = Pattern.compile("([^\\s]+)?(\\s)+");
+            final Matcher matcher = p.matcher(strOptions);
+
+            HashSet<GuildChannel> parsedChannels = new HashSet<GuildChannel>();
             int start = strOptions.indexOf("channel:") + 8;       //Looks for where the channels begin
             
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
@@ -207,101 +213,53 @@ public class MessageEventListener extends ListenerAdapter {
                 if(channel != null)             //Verify channel is not null before adding
                     parsedChannels.add(channel);
             }
-            options.set(1, parsedChannels);         //Sends off the ArrayList in a package with a cute lil bow
-        }
+            return parsedChannels;              //Sends off the ArrayList in a package with a cute lil bow
+    }
 
-        if (countMatches(strOptions, "perm:") == 1) {
-            int start = strOptions.indexOf("perm:") + 5;
-            ArrayList<Object> parsedPerms = new ArrayList<Object>();
-
-            if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
-                start = strOptions.indexOf('{', start) + 1;
-                int end = strOptions.indexOf('}', start);
-                List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
-                for(String s : tempList) {                          //Parses each new seperate string
-                    s = s.trim();                                   //Removes extra whitespaces
-                    try {
-                        parsedPerms.add(Permission.valueOf(s.toUpperCase()));  //Adds to list as a Permission Enum object
-                    } catch (Exception e) {}        //We don't care about the broken ones for now
-                }
-            } else {                //Parse singular entry
-                matcher.find(start);    //Finds next non-whitespace character
-                start = matcher.end();
-                int end = strOptions.indexOf(' ', start);   //Finds next whitespace OR end of string
-                if (end == -1) end = strOptions.length();
-                String strPerm = strOptions.substring(start, end).trim();
-                
-                try {
-                    parsedPerms.add(Permission.valueOf(strPerm.toUpperCase()));  //Adds to list as a Permission Enum object
-                } catch (Exception e) {}        //We don't care about the broken ones for now
-            }
-            options.set(2, parsedPerms);
-        }
-
-        if (countMatches(strOptions, "allow:") == 1) {
-            int start = strOptions.indexOf("allow:") + 6;
-            ArrayList<Object> parsedPerms = new ArrayList<Object>();
-
-            if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
-                start = strOptions.indexOf('{', start) + 1;
-                int end = strOptions.indexOf('}', start);
-                List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
-                for(String s : tempList) {                          //Parses each new seperate string
-                    s = s.trim();                                   //Removes extra whitespaces
-                    try {
-                        parsedPerms.add(Permission.valueOf(s.toUpperCase()));  //Adds to list as a Permission Enum object
-                    } catch (Exception e) {}        //We don't care about the broken ones for now
-                }
-            } else {                //Parse singular entry
-                matcher.find(start);    //Finds next non-whitespace character
-                start = matcher.end();
-                int end = strOptions.indexOf(' ', start);   //Finds next whitespace OR end of string
-                if (end == -1) end = strOptions.length();
-                String strPerm = strOptions.substring(start, end).trim();
-                
-                try {
-                    parsedPerms.add(Permission.valueOf(strPerm.toUpperCase()));  //Adds to list as a Permission Enum object
-                } catch (Exception e) {}        //We don't care about the broken ones for now
-            }
-            options.set(3, parsedPerms);
-        }
-
-        if (countMatches(strOptions, "deny:") == 1) {
-            int start = strOptions.indexOf("deny:") + 5;
-            ArrayList<Object> parsedPerms = new ArrayList<Object>();
-
-            if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
-                start = strOptions.indexOf('{', start) + 1;
-                int end = strOptions.indexOf('}', start);
-                List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
-                for(String s : tempList) {                          //Parses each new seperate string
-                    s = s.trim();                                   //Removes extra whitespaces
-                    try {
-                        parsedPerms.add(Permission.valueOf(s.toUpperCase()));  //Adds to list as a Permission Enum object
-                    } catch (Exception e) {}        //We don't care about the broken ones for now
-                }
-            } else {                //Parse singular entry
-                matcher.find(start);    //Finds next non-whitespace character
-                start = matcher.end();
-                int end = strOptions.indexOf(' ', start);   //Finds next whitespace OR end of string
-                if (end == -1) end = strOptions.length();
-                String strPerm = strOptions.substring(start, end).trim();
-                
-                try {
-                    parsedPerms.add(Permission.valueOf(strPerm.toUpperCase()));  //Adds to list as a Permission Enum object
-                } catch (Exception e) {}        //We don't care about the broken ones for now
-            }
-            options.set(4, parsedPerms);
-        }
-
+    private HashSet<Permission> parsePerms(String strOptions, int type) {
+        String strSearch = "";
         
+        if (type == 0)          //Search for "perms"
+            strSearch = "perm:";
+        else if (type == 1)     //Search for "allow"
+            strSearch = "allow:";
+        else if (type == 2)     //Search for "deny"
+            strSearch = "deny:";
+        else                    //Invalid type
+            return null;
 
-        if (countMatches(strOptions, "conditional:") == 1) {
-            //System.out.println("Conditionals found!");
-            //To be implmented later
+        if (countMatches(strOptions, strSearch) != 1)
+            return null;
+
+        Pattern p = Pattern.compile("([^\\s]+)?(\\s)+");
+        final Matcher matcher = p.matcher(strOptions);
+                
+        int start = strOptions.indexOf(strSearch) + strSearch.length();
+        HashSet<Permission> parsedPerms = new HashSet<Permission>();
+    
+        if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
+            start = strOptions.indexOf('{', start) + 1;
+            int end = strOptions.indexOf('}', start);
+            List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
+            for(String s : tempList) {                          //Parses each new seperate string
+                s = s.trim();                                   //Removes extra whitespaces
+                try {
+                    parsedPerms.add(Permission.valueOf(s.toUpperCase()));  //Adds to list as a Permission Enum object
+                } catch (Exception e) {}        //We don't care about the broken ones for now
+            }
+        } else {                //Parse singular entry
+            matcher.find(start);    //Finds next non-whitespace character
+            start = matcher.end();
+            int end = strOptions.indexOf(' ', start);   //Finds next whitespace OR end of string
+            if (end == -1) end = strOptions.length();
+            String strPerm = strOptions.substring(start, end).trim();
+                    
+            try {
+                parsedPerms.add(Permission.valueOf(strPerm.toUpperCase()));  //Adds to list as a Permission Enum object
+            } catch (Exception e) {}        //We don't care about the broken ones for now
         }
-        
-        return options;
+                       
+        return parsedPerms;
     }
 
     private int countMatches(String input, String match) {      //Basic function to count number of matches in a string

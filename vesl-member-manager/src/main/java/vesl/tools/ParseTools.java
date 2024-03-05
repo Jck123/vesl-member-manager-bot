@@ -182,7 +182,7 @@ public class ParseTools {
 
             if (lastIndex != -1) {
                 counter++;
-                lastIndex++;
+                lastIndex += match.length();
             }
         }
         return counter;

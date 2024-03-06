@@ -1,0 +1,146 @@
+package vesl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.HashSet;
+
+import org.junit.Test;
+
+import jakarta.json.Json;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.IMentionable;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import vesl.tools.ParseTools;
+
+public class ParseToolsTest 
+{
+    private static String CREDENTIALS_DIRECTORY_PATH = "/key.json";
+
+    @Test
+    public void testCountMatches()
+    {
+        //Testing countMatches()
+        assertEquals(1, ParseTools.countMatches("pastry cheese man bobblehead", "pastry"));
+        assertEquals(3, ParseTools.countMatches("pastry cheese man bobblehead", "a"));
+        assertEquals(1, ParseTools.countMatches("aaaaaa", "aaaa"));
+    }
+
+    @Test
+    public void testParseRoles() throws InterruptedException
+    {
+        //Initializing variable to test with
+        final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
+        JDABuilder jdab = JDABuilder.createLight(TOKEN);
+        jdab.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        JDA jda = jdab.build().awaitReady();
+        Guild guild = jda.getGuildById(203282662608207872L);
+        Member member = guild.retrieveMemberById(182967935000772608L).complete();
+        Role role = guild.getRoleById(1205225542882951300L);
+
+        //Testing Role Singular parsing
+        HashSet<IMentionable> expected = new HashSet<IMentionable>(Arrays.asList(role));
+        HashSet<IMentionable> output = ParseTools.parseRoles(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing User Singular parsing
+        expected = new HashSet<IMentionable>(Arrays.asList(member));
+        output = ParseTools.parseRoles(",channelroleset role: <@182967935000772608>  channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing Role/User multi parsing
+        expected = new HashSet<IMentionable>(Arrays.asList(member, role));
+        output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, <@&1205225542882951300>} channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing Role ID parsing
+        expected = new HashSet<IMentionable>(Arrays.asList(role));
+        output = ParseTools.parseRoles(",channelroleset role: 1205225542882951300 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing User ID parsing
+        expected = new HashSet<IMentionable>(Arrays.asList(member));
+        output = ParseTools.parseRoles(",channelroleset role: 182967935000772608 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing Role/User Anti-dupe
+        expected = new HashSet<IMentionable>(Arrays.asList(member, role));
+        output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, 182967935000772608, <@&1205225542882951300>, 1205225542882951300 } channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        jda.shutdownNow();
+    }
+
+    @Test
+    public void testParseChannels() throws InterruptedException
+    {
+        //Initializing variables to test with
+        final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
+        JDABuilder jdab = JDABuilder.createLight(TOKEN);
+        jdab.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        JDA jda = jdab.build().awaitReady();
+        Guild guild = jda.getGuildById(203282662608207872L);
+        TextChannel textChannel = guild.getTextChannelById(203282662608207872L);
+        VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+
+        //Testing Channel Singular parsing
+        HashSet<GuildChannel> expected = new HashSet<GuildChannel>(Arrays.asList(textChannel));
+        HashSet<GuildChannel> output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing Channel multi parse
+        expected = new HashSet<GuildChannel>(Arrays.asList(textChannel, voiceChannel));
+        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, <#1203035987802988585>} allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing Channel ID parse
+        expected = new HashSet<GuildChannel>(Arrays.asList(textChannel));
+        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: 203282662608207872 allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        //Testing Channel Anti-dupe
+        expected = new HashSet<GuildChannel>(Arrays.asList(textChannel, voiceChannel));
+        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, 203282662608207872, <#1203035987802988585>, 1203035987802988585} allow: MESSAGE_SEND", guild);
+        assertTrue(expected.equals(output));
+
+        jda.shutdownNow();
+    }
+
+    @Test
+    public void testParsePerms()
+    {
+        //Testing Permission singular parse
+        HashSet<Permission> expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND));
+        HashSet<Permission> output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", 1);
+        assertTrue(expected.equals(output));
+
+        //Testing Permission multi parse
+        expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.KICK_MEMBERS));
+        output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: {MESSAGE_SEND, KICK_MEMBERS}", 1);
+        assertTrue(expected.equals(output));
+
+        //Testing Permission Anti-dupe
+        expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.KICK_MEMBERS));
+        output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: {MESSAGE_SEND, MESSAGE_SEND, KICK_MEMBERS, KICK_MEMBERS}", 1);
+        assertTrue(expected.equals(output));
+
+        //Testing "deny:" detection
+        expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND));
+        output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> deny: MESSAGE_SEND", 2);
+        assertTrue(expected.equals(output));
+
+        //Testing "perm:" detection
+        expected = new HashSet<Permission>(Arrays.asList(Permission.KICK_MEMBERS));
+        output = ParseTools.parsePerms(",channelroleclear role: <@&1205225542882951300> channel: <#203282662608207872> perm: KICK_MEMBERS", 0);
+        assertTrue(expected.equals(output));
+    }
+}

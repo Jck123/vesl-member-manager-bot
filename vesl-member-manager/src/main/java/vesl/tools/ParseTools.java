@@ -123,7 +123,9 @@ public class ParseTools {
                     GuildChannel channel = null;
 
                     if (s.startsWith("<#"))                     //Verifies it's a channel, tries to parse number otherwise
-                        channel = guild.getGuildChannelById(s.substring(2, s.length() - 1));  //Adds to list as a GuildChannel object
+                        try {
+                            channel = guild.getGuildChannelById(s.substring(2, s.length() - 1));  //Adds to list as a GuildChannel object
+                        } catch (NumberFormatException e) {}
                     else
                         try {               //Try as if only guild channel ID were input
                             channel = guild.getGuildChannelById(s);
@@ -141,7 +143,9 @@ public class ParseTools {
                 String strChannel = strOptions.substring(start, end).trim();
                 GuildChannel channel = null;
                 if (strChannel.startsWith("<#"))        //Verifies it's a channel, skips otherwise
-                    channel = guild.getGuildChannelById(strChannel.substring(2, strChannel.length() - 1));
+                    try {
+                        channel = guild.getGuildChannelById(strChannel.substring(2, strChannel.length() - 1));
+                    } catch (NumberFormatException e) {}
                 else
                     try {       //Try as if only guild channel ID were input
                         channel = guild.getGuildChannelById(strChannel);
@@ -150,6 +154,9 @@ public class ParseTools {
                 if(channel != null)             //Verify channel is not null before adding
                     parsedChannels.add(channel);
             }
+
+            if (parsedChannels.isEmpty())
+                return null;
             return parsedChannels;              //Sends off the ArrayList in a package with a cute lil bow
     }
 
@@ -199,7 +206,9 @@ public class ParseTools {
                 parsedPerms.add(Permission.valueOf(strPerm.toUpperCase()));  //Adds to list as a Permission Enum object
             } catch (Exception e) {}        //We don't care about the broken ones for now
         }
-                       
+        
+        if (parsedPerms.isEmpty())
+            return null;
         return parsedPerms;
     }
 

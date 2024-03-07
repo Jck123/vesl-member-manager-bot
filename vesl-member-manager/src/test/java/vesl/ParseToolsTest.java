@@ -1,6 +1,7 @@
 package vesl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -77,6 +78,13 @@ public class ParseToolsTest
         output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, 182967935000772608, <@&1205225542882951300>, 1205225542882951300 } channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
+        //Testing error handling
+        output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, 182967935000772608, <@&1205225542882951300>, 1205225542882951300 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertNull(output);
+
+        output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608, 12052255428951300, #general } channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        assertNull(output);
+
         jda.shutdownNow();
     }
 
@@ -112,6 +120,13 @@ public class ParseToolsTest
         output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, 203282662608207872, <#1203035987802988585>, 1203035987802988585} allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
+        //Testing error handling
+        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, 203282662608207872, <#1203035987802988585>, 1203035987802988585 allow: MESSAGE_SEND", guild);
+        assertNull(output);
+
+        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872, 1203035987802, @AAAAA } allow: MESSAGE_SEND", guild);
+        assertNull(output);
+
         jda.shutdownNow();
     }
 
@@ -142,5 +157,12 @@ public class ParseToolsTest
         expected = new HashSet<Permission>(Arrays.asList(Permission.KICK_MEMBERS));
         output = ParseTools.parsePerms(",channelroleclear role: <@&1205225542882951300> channel: <#203282662608207872> perm: KICK_MEMBERS", 0);
         assertTrue(expected.equals(output));
+
+        //Testing error handling
+        output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: {MESSAGE_SEND", 1);
+        assertNull(output);
+
+        output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESGE_SEND", 1);
+        assertNull(output);
     }
 }

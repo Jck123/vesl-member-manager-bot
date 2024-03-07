@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class ParseTools {
     public static HashSet<IMentionable> parseRoles(String strOptions, Guild guild) {
@@ -24,15 +25,26 @@ public class ParseTools {
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
                 start = strOptions.indexOf('{', start) + 1;
                 int end = strOptions.indexOf('}', start);
+                int nextOpt = strOptions.indexOf(':', start);
+                if (end == -1 || (nextOpt != -1 && end > nextOpt))
+                    return null;        //If no closing bracket is found or it is found after a colon, return null(inicating error)
+
                 List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));
                 for(String s : tempList) {
                     s = s.trim();
                     IMentionable mention = null;
                     if (s.startsWith("<@")) {
                         if (s.charAt(2) == '&')     //Indicates Role
-                            mention = guild.getRoleById(s.substring(3, s.length() - 1));
+                            try {
+                                mention = guild.getRoleById(s.substring(3, s.length() - 1));
+                            } catch (NumberFormatException e) {}
                         else                        //Indicates User
+                            try {
                             mention = guild.retrieveMemberById(s.substring(2, s.length() - 1)).complete();
+                            } catch (Exception e) {
+                                if (!(e instanceof ErrorResponseException || e instanceof IllegalArgumentException || e instanceof NumberFormatException))
+                                    throw e;
+                            }
                     } else {
                         try {
                             mention = guild.getRoleById(s);
@@ -55,11 +67,18 @@ public class ParseTools {
                 if (end == -1) end = strOptions.length();
                 String strRole = strOptions.substring(start, end).trim();
                 IMentionable mention = null;
-                if (strRole.startsWith("<@")) {         //Skip if not role or user(all of them start with this)
-                    if (strRole.charAt(2) == '&')       //Indicates Role
-                        mention = guild.getRoleById(strRole.substring(3, strRole.length() - 1));
-                    else                                //Indicates User
+                if (strRole.startsWith("<@")) {
+                    if (strRole.charAt(2) == '&')     //Indicates Role
+                        try {
+                            mention = guild.getRoleById(strRole.substring(3, strRole.length() - 1));
+                        } catch (NumberFormatException e) {}
+                    else                        //Indicates User
+                        try {
                         mention = guild.retrieveMemberById(strRole.substring(2, strRole.length() - 1)).complete();
+                        } catch (Exception e) {
+                            if (!(e instanceof ErrorResponseException || e instanceof IllegalArgumentException || e instanceof NumberFormatException))
+                                throw e;
+                        }
                 } else {
                     try {       //Try to see if only number is present
                         mention = guild.getRoleById(strRole);
@@ -75,6 +94,9 @@ public class ParseTools {
                     parsedRoles.add(mention);
             }
             
+            if (parsedRoles.isEmpty())
+                return null;
+
             return parsedRoles;
     }
 
@@ -91,6 +113,10 @@ public class ParseTools {
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
                 start = strOptions.indexOf('{', start) + 1;
                 int end = strOptions.indexOf('}', start);
+                int nextOpt = strOptions.indexOf(':', start);
+                if (end == -1 || (nextOpt != -1 && end > nextOpt))
+                    return null;        //If no closing bracket is found or it is found after a colon, return null(inicating error)
+                
                 List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
                 for(String s : tempList) {                          //Parses each new seperate string
                     s = s.trim();                                   //Removes extra whitespaces
@@ -151,6 +177,10 @@ public class ParseTools {
         if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
             start = strOptions.indexOf('{', start) + 1;
             int end = strOptions.indexOf('}', start);
+            int nextOpt = strOptions.indexOf(':', start);
+            if (end == -1 || (nextOpt != -1 && end > nextOpt))
+                return null;        //If no closing bracket is found or it is found after a colon, return null(inicating error)
+            
             List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));     //Splits up list, using commas as seperators
             for(String s : tempList) {                          //Parses each new seperate string
                 s = s.trim();                                   //Removes extra whitespaces

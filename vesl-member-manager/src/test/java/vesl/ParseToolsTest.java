@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.IMentionable;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -49,32 +49,32 @@ public class ParseToolsTest
         Role role = guild.getRoleById(1205225542882951300L);
 
         //Testing Role Singular parsing
-        HashSet<IMentionable> expected = new HashSet<IMentionable>(Arrays.asList(role));
-        HashSet<IMentionable> output = ParseTools.parseRoles(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
+        HashSet<IPermissionHolder> expected = new HashSet<IPermissionHolder>(Arrays.asList(role));
+        HashSet<IPermissionHolder> output = ParseTools.parseRoles(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
         //Testing User Singular parsing
-        expected = new HashSet<IMentionable>(Arrays.asList(member));
+        expected = new HashSet<IPermissionHolder>(Arrays.asList(member));
         output = ParseTools.parseRoles(",channelroleset role: <@182967935000772608>  channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
         //Testing Role/User multi parsing
-        expected = new HashSet<IMentionable>(Arrays.asList(member, role));
+        expected = new HashSet<IPermissionHolder>(Arrays.asList(member, role));
         output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, <@&1205225542882951300>} channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
         //Testing Role ID parsing
-        expected = new HashSet<IMentionable>(Arrays.asList(role));
+        expected = new HashSet<IPermissionHolder>(Arrays.asList(role));
         output = ParseTools.parseRoles(",channelroleset role: 1205225542882951300 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
         //Testing User ID parsing
-        expected = new HashSet<IMentionable>(Arrays.asList(member));
+        expected = new HashSet<IPermissionHolder>(Arrays.asList(member));
         output = ParseTools.parseRoles(",channelroleset role: 182967935000772608 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 
         //Testing Role/User Anti-dupe
-        expected = new HashSet<IMentionable>(Arrays.asList(member, role));
+        expected = new HashSet<IPermissionHolder>(Arrays.asList(member, role));
         output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, 182967935000772608, <@&1205225542882951300>, 1205225542882951300 } channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
         assertTrue(expected.equals(output));
 

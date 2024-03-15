@@ -8,12 +8,12 @@ import java.util.regex.Pattern;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.IMentionable;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class ParseTools {
-    public static HashSet<IMentionable> parseRoles(String strOptions, Guild guild) {
+    public static HashSet<IPermissionHolder> parseRoles(String strOptions, Guild guild) {
         if (countMatches(strOptions, "role:") != 1)
             return null;
         
@@ -21,7 +21,7 @@ public class ParseTools {
         final Matcher matcher = p.matcher(strOptions);
 
         int start = strOptions.indexOf("role:") + 5;
-            HashSet<IMentionable> parsedRoles = new HashSet<IMentionable>();
+            HashSet<IPermissionHolder> parsedRoles = new HashSet<IPermissionHolder>();
             if (strOptions.charAt(start) == '{' || strOptions.charAt(start + 1) == '{') {       //Parse multi entry(indicated by "{}")
                 start = strOptions.indexOf('{', start) + 1;
                 int end = strOptions.indexOf('}', start);
@@ -32,7 +32,7 @@ public class ParseTools {
                 List<String> tempList = Arrays.asList(strOptions.substring(start, end).split("\\s*,\\s*"));
                 for(String s : tempList) {
                     s = s.trim();
-                    IMentionable mention = null;
+                    IPermissionHolder mention = null;
                     if (s.startsWith("<@")) {
                         if (s.charAt(2) == '&')     //Indicates Role
                             try {
@@ -66,7 +66,7 @@ public class ParseTools {
                 int end = strOptions.indexOf(' ', start);       //Tries to find the next space OR end of string
                 if (end == -1) end = strOptions.length();
                 String strRole = strOptions.substring(start, end).trim();
-                IMentionable mention = null;
+                IPermissionHolder mention = null;
                 if (strRole.startsWith("<@")) {
                     if (strRole.charAt(2) == '&')     //Indicates Role
                         try {

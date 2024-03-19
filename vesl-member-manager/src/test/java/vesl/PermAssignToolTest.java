@@ -1,7 +1,8 @@
 package vesl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -62,8 +63,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Testing perm adds on top of previous perms
         expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.MESSAGE_ADD_REACTION, Permission.MANAGE_THREADS, Permission.MESSAGE_EMBED_LINKS));
@@ -76,8 +77,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
 
         //Error handling
@@ -92,8 +93,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Null Role
         assertEquals(-2, PermAssignTool.permsAdd(guild, null, null, null, null));
@@ -101,8 +102,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Null GuildChannel
         assertEquals(-3, PermAssignTool.permsAdd(guild, role, null, null, null));
@@ -110,8 +111,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Null Allow AND Deny List
         assertEquals(-4, PermAssignTool.permsAdd(guild, role, channel, null, null));
@@ -119,11 +120,11 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Clean up and shut down
-        channelManager.removePermissionOverride(role).queue();
+        channelManager.removePermissionOverride(role).complete();
         jda.shutdownNow();
     }
 
@@ -161,8 +162,9 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
+
 
         //Error handling
         expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.MESSAGE_ADD_REACTION, Permission.MANAGE_THREADS, Permission.MESSAGE_EMBED_LINKS));
@@ -175,8 +177,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Null Role
         assertEquals(-2, PermAssignTool.permsClear(guild, null, null, null));
@@ -184,8 +186,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Null GuildChannel
         assertEquals(-3, PermAssignTool.permsClear(guild, role, null, null));
@@ -193,8 +195,8 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         //Null Permission list
         assertEquals(-4, PermAssignTool.permsClear(guild, role, channel, null));
@@ -202,12 +204,16 @@ public class PermAssignToolTest {
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
-        assertTrue(expectedAllow.equals(actualAllow));
-        assertTrue(expectedDeny.equals(actualDeny));
+        assertThat(actualAllow, is(expectedAllow));
+        assertThat(actualDeny, is(expectedDeny));
 
         
-        //Clean up and shut down
-        channelManager.removePermissionOverride(role).queue();
+        //Clean up
+        channelManager.removePermissionOverride(role).complete();
+
+        //Test no perms to remove error
+        assertEquals(-5, PermAssignTool.permsClear(guild, role, channel, inputPerms));
+
         jda.shutdownNow();
     }
     
@@ -253,8 +259,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }
 
@@ -272,8 +278,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }
 
@@ -295,8 +301,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow2.equals(actualAllow));
-                assertTrue(expectedDeny2.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow2));
+                assertThat(actualDeny, is(expectedDeny2));
             }
         }
 
@@ -306,8 +312,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow2));
+                assertThat(actualDeny, is(expectedDeny2));
             }
         }        
         
@@ -322,8 +328,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }
 
@@ -336,8 +342,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }
 
@@ -350,8 +356,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }
 
@@ -365,8 +371,8 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertTrue(expectedAllow.equals(actualAllow));
-                assertTrue(expectedDeny.equals(actualDeny));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }
 

@@ -167,9 +167,9 @@ public class PermAssignToolTest {
 
 
         //Error handling
-        expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.MESSAGE_ADD_REACTION, Permission.MANAGE_THREADS, Permission.MESSAGE_EMBED_LINKS));
-        expectedDeny = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_ATTACH_VOICE_MESSAGE, Permission.MESSAGE_SEND_IN_THREADS));
-        inputPerms = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES));
+        expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MANAGE_THREADS, Permission.MESSAGE_EMBED_LINKS));
+        expectedDeny = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_ATTACH_VOICE_MESSAGE, Permission.MESSAGE_SEND_IN_THREADS));
+        inputPerms = new HashSet<Permission>(Arrays.asList(Permission.MANAGE_THREADS, Permission.MESSAGE_ATTACH_VOICE_MESSAGE));
 
         //Null Guild
         assertEquals(-1, PermAssignTool.permsClear(null, null, null, null));

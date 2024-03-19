@@ -32,7 +32,29 @@ public class PermAssignTool {
     }
 
     public static int permsClear(Guild guild, IPermissionHolder role, GuildChannel channel, Set<Permission> perms) {
-        return -1;
+        if (guild == null)
+            return -1;
+        if (role == null)
+            return -2;
+        if (channel == null)
+            return -3;
+        if (perms == null || perms.isEmpty())
+            return -4;
+
+        PermissionOverride oldPerms = channel.getPermissionContainer().getPermissionOverride(role);
+
+        if (oldPerms == null)
+            return -5;
+
+        Set<Permission> oldAllow = oldPerms.getAllowed();
+        Set<Permission> oldDeny = oldPerms.getDenied();
+
+        oldAllow.removeAll(perms);
+        oldDeny.removeAll(perms);
+
+        channel.getPermissionContainer().getManager().putPermissionOverride(role, oldAllow, oldDeny).complete();
+
+        return 0;
     }
     
     public static int permsSetAll(Guild guild, Set<IPermissionHolder> roles, Set<GuildChannel> channels, Set<Permission> allow, Set<Permission> deny) {

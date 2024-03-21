@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.managers.channel.attribute.IPermissionContainerManager;
 
 public class PermAssignTool {
     public static int permsAdd(Guild guild, IPermissionHolder role, GuildChannel channel, Set<Permission> allow, Set<Permission> deny) {
@@ -57,8 +58,29 @@ public class PermAssignTool {
         return 0;
     }
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static int permsSetAll(Guild guild, Set<IPermissionHolder> roles, Set<GuildChannel> channels, Set<Permission> allow, Set<Permission> deny) {
-        return -1;
+        if (guild == null)
+            return -1;
+        if (roles == null || roles.isEmpty())
+            return -2;
+        if (channels == null || channels.isEmpty())
+            return -3;
+        if ((allow == null || allow.isEmpty()) && (deny == null || deny.isEmpty()))
+            return -4;
+
+
+            
+        for (GuildChannel c : channels) {
+            
+            IPermissionContainerManager permContainerManager = c.getPermissionContainer().getManager();
+            for (IPermissionHolder r : roles) {
+                permContainerManager.putPermissionOverride(r, allow, deny);
+            }
+            permContainerManager.complete();
+        }
+
+        return 0;
     }
 
     public static int permsAddAll(Guild guild, Set<IPermissionHolder> roles, Set<GuildChannel> channels, Set<Permission> perms, Set<Permission> deny) {

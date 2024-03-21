@@ -1,6 +1,7 @@
 package vesl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -17,12 +18,14 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import vesl.tools.PermAssignTool;
 
 public class PermAssignToolTest {
@@ -35,6 +38,7 @@ public class PermAssignToolTest {
         final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
         JDABuilder jdab = JDABuilder.createLight(TOKEN);
         jdab.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        jdab.enableCache(CacheFlag.MEMBER_OVERRIDES);
         JDA jda = jdab.build().awaitReady();
         
         //Object setup
@@ -135,6 +139,7 @@ public class PermAssignToolTest {
         final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
         JDABuilder jdab = JDABuilder.createLight(TOKEN);
         jdab.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        jdab.enableCache(CacheFlag.MEMBER_OVERRIDES);
         JDA jda = jdab.build().awaitReady();
         
         //Object setup
@@ -224,6 +229,7 @@ public class PermAssignToolTest {
         final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
         JDABuilder jdab = JDABuilder.createLight(TOKEN);
         jdab.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        jdab.enableCache(CacheFlag.MEMBER_OVERRIDES);
         JDA jda = jdab.build().awaitReady();
         
         //Object setup
@@ -231,7 +237,7 @@ public class PermAssignToolTest {
         
         Role role1 = guild.getRoleById(1205225542882951300L);
         Role role2 = guild.getRoleById(1217608439832776795L);
-        Member member = guild.getMemberById(1137409049269391490L);
+        Member member = guild.retrieveMemberById(1137409049269391490L).complete();
 
         TextChannel textChannel1 = guild.getTextChannelById(203282662608207872L);
         TextChannel textChannel2 = guild.getTextChannelById(217766003449397248L);
@@ -246,6 +252,12 @@ public class PermAssignToolTest {
         Set<Permission> inputAllow = null;
         Set<Permission> inputDeny = null;
 
+        //Clearing current perms to set things up
+        for (GuildChannel c : channels)
+            for (IPermissionHolder r : roles) {
+                c.getPermissionContainer().getManager().removePermissionOverride(r).complete();
+            }
+
         //Testing perm setting
         expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_HISTORY, Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT));
         expectedDeny = new HashSet<Permission>(Arrays.asList(Permission.MANAGE_THREADS, Permission.MESSAGE_EXT_EMOJI, Permission.VOICE_SPEAK));
@@ -256,8 +268,12 @@ public class PermAssignToolTest {
 
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
-                actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
-                actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
+                PermissionOverride permOverride = c.getPermissionContainer().getPermissionOverride(r);
+
+                assertNotNull(permOverride);
+
+                actualAllow = permOverride.getAllowed();
+                actualDeny = permOverride.getDenied();
 
                 assertThat(actualAllow, is(expectedAllow));
                 assertThat(actualDeny, is(expectedDeny));
@@ -275,8 +291,12 @@ public class PermAssignToolTest {
 
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
-                actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
-                actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
+                PermissionOverride permOverride = c.getPermissionContainer().getPermissionOverride(r);
+                
+                assertNotNull(permOverride);
+
+                actualAllow = permOverride.getAllowed();
+                actualDeny = permOverride.getDenied();
 
                 assertThat(actualAllow, is(expectedAllow));
                 assertThat(actualDeny, is(expectedDeny));
@@ -290,10 +310,10 @@ public class PermAssignToolTest {
         channels2.removeAll(channels1);
         Set<Permission> expectedAllow2 = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_MENTION_EVERYONE));
         Set<Permission> expectedDeny2 = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND_IN_THREADS, Permission.VOICE_SET_STATUS));
-        inputAllow = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_MENTION_EVERYONE));
-        inputDeny = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND_IN_THREADS, Permission.VOICE_SET_STATUS));
+        Set<Permission> inputAllow2 = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_MENTION_EVERYONE));
+        Set<Permission> inputDeny2 = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND_IN_THREADS, Permission.VOICE_SET_STATUS));
 
-        assertEquals(0, PermAssignTool.permsSetAll(guild, roles, channels1, inputAllow, inputDeny));
+        assertEquals(0, PermAssignTool.permsSetAll(guild, roles, channels1, inputAllow2, inputDeny2));
         
         //Verify select channels were affected
         for(GuildChannel c : channels1) {
@@ -312,11 +332,13 @@ public class PermAssignToolTest {
                 actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
                 actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
 
-                assertThat(actualAllow, is(expectedAllow2));
-                assertThat(actualDeny, is(expectedDeny2));
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
             }
         }        
         
+        //Resyncing perms
+        PermAssignTool.permsSetAll(guild, roles, channels, inputAllow, inputDeny);
 
         //Error handling
         //Null Guild

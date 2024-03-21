@@ -10,7 +10,7 @@ public class App {
     public static void main( String[] args ) {
         final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
         JDABuilder jdab = JDABuilder.createLight(TOKEN);
-        jdab.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS);
+        jdab.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT);
         jdab.addEventListeners(new MessageEventListener());
 
         jdab.build();

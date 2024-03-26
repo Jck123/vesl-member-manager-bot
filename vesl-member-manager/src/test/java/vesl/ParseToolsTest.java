@@ -2,7 +2,8 @@ package vesl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,32 +52,32 @@ public class ParseToolsTest
         //Testing Role Singular parsing
         HashSet<IPermissionHolder> expected = new HashSet<IPermissionHolder>(Arrays.asList(role));
         HashSet<IPermissionHolder> output = ParseTools.parseRoles(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing User Singular parsing
         expected = new HashSet<IPermissionHolder>(Arrays.asList(member));
         output = ParseTools.parseRoles(",channelroleset role: <@182967935000772608>  channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Role/User multi parsing
         expected = new HashSet<IPermissionHolder>(Arrays.asList(member, role));
         output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, <@&1205225542882951300>} channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Role ID parsing
         expected = new HashSet<IPermissionHolder>(Arrays.asList(role));
         output = ParseTools.parseRoles(",channelroleset role: 1205225542882951300 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing User ID parsing
         expected = new HashSet<IPermissionHolder>(Arrays.asList(member));
         output = ParseTools.parseRoles(",channelroleset role: 182967935000772608 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Role/User Anti-dupe
         expected = new HashSet<IPermissionHolder>(Arrays.asList(member, role));
         output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, 182967935000772608, <@&1205225542882951300>, 1205225542882951300 } channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing error handling
         output = ParseTools.parseRoles(",channelroleset role: {<@182967935000772608>, 182967935000772608, <@&1205225542882951300>, 1205225542882951300 channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
@@ -103,22 +104,22 @@ public class ParseToolsTest
         //Testing Channel Singular parsing
         HashSet<GuildChannel> expected = new HashSet<GuildChannel>(Arrays.asList(textChannel));
         HashSet<GuildChannel> output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Channel multi parse
         expected = new HashSet<GuildChannel>(Arrays.asList(textChannel, voiceChannel));
         output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, <#1203035987802988585>} allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Channel ID parse
         expected = new HashSet<GuildChannel>(Arrays.asList(textChannel));
         output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: 203282662608207872 allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Channel Anti-dupe
         expected = new HashSet<GuildChannel>(Arrays.asList(textChannel, voiceChannel));
         output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, 203282662608207872, <#1203035987802988585>, 1203035987802988585} allow: MESSAGE_SEND", guild);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing error handling
         output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, 203282662608207872, <#1203035987802988585>, 1203035987802988585 allow: MESSAGE_SEND", guild);
@@ -136,27 +137,27 @@ public class ParseToolsTest
         //Testing Permission singular parse
         HashSet<Permission> expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND));
         HashSet<Permission> output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: MESSAGE_SEND", 1);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Permission multi parse
         expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.KICK_MEMBERS));
         output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: {MESSAGE_SEND, KICK_MEMBERS}", 1);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing Permission Anti-dupe
         expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.KICK_MEMBERS));
         output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: {MESSAGE_SEND, MESSAGE_SEND, KICK_MEMBERS, KICK_MEMBERS}", 1);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing "deny:" detection
         expected = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND));
         output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> deny: MESSAGE_SEND", 2);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing "perm:" detection
         expected = new HashSet<Permission>(Arrays.asList(Permission.KICK_MEMBERS));
         output = ParseTools.parsePerms(",channelroleclear role: <@&1205225542882951300> channel: <#203282662608207872> perm: KICK_MEMBERS", 0);
-        assertTrue(expected.equals(output));
+        assertThat(output, is(expected));
 
         //Testing error handling
         output = ParseTools.parsePerms(",channelroleset role: <@&1205225542882951300> channel: <#203282662608207872> allow: {MESSAGE_SEND", 1);

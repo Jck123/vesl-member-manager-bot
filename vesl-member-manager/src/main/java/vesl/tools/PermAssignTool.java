@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.managers.channel.attribute.IPermissionContainerManager;
 
 public class PermAssignTool {
+    @Deprecated
     public static int permsAdd(Guild guild, IPermissionHolder role, GuildChannel channel, Set<Permission> allow, Set<Permission> deny) {
         if (guild == null)
             return -1;
@@ -38,6 +39,7 @@ public class PermAssignTool {
         return 0;
     }
 
+    @Deprecated
     public static int permsClear(Guild guild, IPermissionHolder role, GuildChannel channel, Set<Permission> perms) throws NullPointerException {
         if (guild == null)
             return -1;

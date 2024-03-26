@@ -65,6 +65,8 @@ public class PermAssignToolTest {
 
         assertEquals(0, PermAssignTool.permsAdd(guild, role, channel, inputAllow, inputDeny));
 
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -79,6 +81,8 @@ public class PermAssignToolTest {
 
         assertEquals(0, PermAssignTool.permsAdd(guild, role, channel, inputAllow, inputDeny));
         
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -95,6 +99,8 @@ public class PermAssignToolTest {
         //Null Guild
         assertEquals(-1, PermAssignTool.permsAdd(null, null, null, null, null));
 
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -103,6 +109,8 @@ public class PermAssignToolTest {
 
         //Null Role
         assertEquals(-2, PermAssignTool.permsAdd(guild, null, null, null, null));
+
+        Thread.sleep(3000);
 
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
@@ -113,6 +121,8 @@ public class PermAssignToolTest {
         //Null GuildChannel
         assertEquals(-3, PermAssignTool.permsAdd(guild, role, null, null, null));
 
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -122,6 +132,8 @@ public class PermAssignToolTest {
         //Null Allow AND Deny List
         assertEquals(-4, PermAssignTool.permsAdd(guild, role, channel, null, null));
 
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -130,6 +142,7 @@ public class PermAssignToolTest {
 
         //Clean up and shut down
         channelManager.removePermissionOverride(role).complete();
+        Thread.sleep(3000);
         jda.shutdownNow();
     }
 
@@ -159,12 +172,16 @@ public class PermAssignToolTest {
         channelManager.removePermissionOverride(role).complete();
         channelManager.putPermissionOverride(role, new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.MESSAGE_ADD_REACTION, Permission.MANAGE_THREADS, Permission.MESSAGE_EMBED_LINKS)), new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_ATTACH_VOICE_MESSAGE, Permission.MESSAGE_SEND_IN_THREADS))).complete();
 
+        Thread.sleep(3000);
+
         //Testing perm clearing
         expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MANAGE_THREADS, Permission.MESSAGE_EMBED_LINKS));
         expectedDeny = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_ATTACH_VOICE_MESSAGE, Permission.MESSAGE_SEND_IN_THREADS));
         inputPerms = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND, Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_EXT_EMOJI));
 
         assertEquals(0, PermAssignTool.permsClear(guild, role, channel, inputPerms));
+
+        Thread.sleep(3000);
 
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
@@ -181,6 +198,8 @@ public class PermAssignToolTest {
         //Null Guild
         assertEquals(-1, PermAssignTool.permsClear(null, null, null, null));
 
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -189,6 +208,8 @@ public class PermAssignToolTest {
 
         //Null Role
         assertEquals(-2, PermAssignTool.permsClear(guild, null, null, null));
+
+        Thread.sleep(3000);
 
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
@@ -199,6 +220,8 @@ public class PermAssignToolTest {
         //Null GuildChannel
         assertEquals(-3, PermAssignTool.permsClear(guild, role, null, null));
 
+        Thread.sleep(3000);
+
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
 
@@ -207,6 +230,8 @@ public class PermAssignToolTest {
 
         //Null Permission list
         assertEquals(-4, PermAssignTool.permsClear(guild, role, channel, null));
+
+        Thread.sleep(3000);
 
         actualAllow = channel.getPermissionOverride(role).getAllowed();
         actualDeny = channel.getPermissionOverride(role).getDenied();
@@ -217,9 +242,13 @@ public class PermAssignToolTest {
         
         //Clean up
         channelManager.removePermissionOverride(role).complete();
+        
+        Thread.sleep(3000);
 
         //Test no perms to remove error
         assertEquals(-5, PermAssignTool.permsClear(guild, role, channel, inputPerms));
+        
+        Thread.sleep(3000);
 
         jda.shutdownNow();
     }
@@ -352,6 +381,8 @@ public class PermAssignToolTest {
         //Null Guild
         assertEquals(-1, PermAssignTool.permsSetAll(null, null, null, null, null));
 
+        Thread.sleep(3000);
+
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
@@ -365,6 +396,8 @@ public class PermAssignToolTest {
 
         //Null Role List
         assertEquals(-2, PermAssignTool.permsSetAll(guild, null, null, null, null));
+
+        Thread.sleep(3000);
 
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
@@ -380,6 +413,8 @@ public class PermAssignToolTest {
         //Null Channel List
         assertEquals(-3, PermAssignTool.permsSetAll(guild, roles, null, null, null));
 
+        Thread.sleep(3000);
+
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
@@ -394,6 +429,8 @@ public class PermAssignToolTest {
 
         //Null Allow AND Deny List
         assertEquals(-4, PermAssignTool.permsSetAll(guild, roles, channels, null, null));
+
+        Thread.sleep(3000);
 
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
@@ -546,6 +583,8 @@ public class PermAssignToolTest {
         //Null Guild
         assertEquals(-1, PermAssignTool.permsAddAll(null, null, null, null, null));
 
+        Thread.sleep(3000);
+
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
@@ -559,6 +598,8 @@ public class PermAssignToolTest {
 
         //Null Role List
         assertEquals(-2, PermAssignTool.permsAddAll(guild, null, null, null, null));
+
+        Thread.sleep(3000);
 
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
@@ -574,6 +615,8 @@ public class PermAssignToolTest {
         //Null Channel List
         assertEquals(-3, PermAssignTool.permsAddAll(guild, roles, null, null, null));
 
+        Thread.sleep(3000);
+
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
@@ -588,6 +631,8 @@ public class PermAssignToolTest {
 
         //Null Allow AND Deny List
         assertEquals(-4, PermAssignTool.permsAddAll(guild, roles, channels, null, null));
+
+        Thread.sleep(3000);
 
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
@@ -734,9 +779,13 @@ public class PermAssignToolTest {
         expectedAllow = expectedAllow2;
         expectedDeny = expectedDeny2;
 
+        Thread.sleep(3000);
+
         //Error handling
         //Null Guild
         assertEquals(-1, PermAssignTool.permsAddAll(null, null, null, null, null));
+
+        Thread.sleep(3000);
 
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
@@ -752,6 +801,8 @@ public class PermAssignToolTest {
         //Null Role List
         assertEquals(-2, PermAssignTool.permsAddAll(guild, null, null, null, null));
 
+        Thread.sleep(3000);
+
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {
@@ -765,6 +816,8 @@ public class PermAssignToolTest {
 
         //Null Channel List
         assertEquals(-3, PermAssignTool.permsAddAll(guild, roles, null, null, null));
+
+        Thread.sleep(3000);
 
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
@@ -781,6 +834,8 @@ public class PermAssignToolTest {
         //Null Allow AND Deny List
         assertEquals(-4, PermAssignTool.permsAddAll(guild, roles, channels, null, null));
 
+        Thread.sleep(3000);
+        
         //Verify channels remained unchanged
         for (GuildChannel c : channels) {
             for (IPermissionHolder r : roles) {

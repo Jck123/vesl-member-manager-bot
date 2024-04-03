@@ -18,7 +18,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.StageChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -100,6 +104,10 @@ public class ParseToolsTest
         Guild guild = jda.getGuildById(203282662608207872L);
         TextChannel textChannel = guild.getTextChannelById(203282662608207872L);
         VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+        StageChannel stageChannel = guild.getStageChannelById(1225114961823666217L);
+        NewsChannel newsChannel = guild.getNewsChannelById(1225114793308983487L);
+        ForumChannel forumChannel = guild.getForumChannelById(1225114742868410429L);
+        ThreadChannel threadChannel = guild.getThreadChannelById(1222690971125547140L);
 
         //Testing Channel Singular parsing
         HashSet<GuildChannel> expected = new HashSet<GuildChannel>(Arrays.asList(textChannel));
@@ -107,8 +115,8 @@ public class ParseToolsTest
         assertThat(output, is(expected));
 
         //Testing Channel multi parse
-        expected = new HashSet<GuildChannel>(Arrays.asList(textChannel, voiceChannel));
-        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, <#1203035987802988585>} allow: MESSAGE_SEND", guild);
+        expected = new HashSet<GuildChannel>(Arrays.asList(textChannel, voiceChannel, stageChannel, newsChannel, forumChannel, threadChannel));
+        output = ParseTools.parseChannels(",channelroleset role: <@&1205225542882951300> channel: {<#203282662608207872>, <#1203035987802988585>, <#1225114961823666217>, <#1225114793308983487>, <#1225114742868410429>, <#1222690971125547140>} allow: MESSAGE_SEND", guild);
         assertThat(output, is(expected));
 
         //Testing Channel ID parse

@@ -52,8 +52,6 @@ public class ButtonInteractionListener extends ListenerAdapter {
             event.reply("").addEmbeds(embed.build()).queue();
         } else if (buttonSelection.equals("memberMangerDeny")) {
             ProcessCache.remove(pID);
-            //TODO:Send message to signify process has been rejected?
-            //Ephemeral? No message? Don't need to specify if process has expired?
             MessageEmbed currentEmbed = event.getMessage().getEmbeds().get(0);
             EmbedBuilder embed = new EmbedBuilder(currentEmbed).setFooter("This process has alread been denied or expired. Please generate a new one");
             event.editMessageEmbeds(embed.build()).setComponents().queue();

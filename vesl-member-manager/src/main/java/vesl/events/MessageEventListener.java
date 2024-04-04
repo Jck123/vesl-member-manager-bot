@@ -155,7 +155,7 @@ public class MessageEventListener extends ListenerAdapter {
                 //Switches channels around 
                 if(channelInverse) {
                     Set<GuildChannel> allChannels = new HashSet<GuildChannel>(guild.getChannels());
-                    for(GuildChannel c : allChannels)          //new PermAssignDataPack(PermAssignDataType.SET, roles, channels, allow, deny) //Removes all channels that are already synced to the category perms
+                    for(GuildChannel c : allChannels)          //Removes all channels that are already synced to the category perms
                         if(c.getType() == ChannelType.CATEGORY)
                             for(GuildChannel c2 : ((Category)c).getChannels())
                                 if (((ICategorizableChannel)c2).isSynced())
@@ -220,35 +220,6 @@ public class MessageEventListener extends ListenerAdapter {
                         ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(PermAssignDataType.SET, roles, chan, allow, deny));
                     }
                 );
-
-                /*permContainer.getManager().putPermissionOverride(permHolder, allow, deny).queue(
-                    (success) -> System.out.println("Permission override created successfully."),
-                    (error) -> System.out.println("Failed to create permission override: " + error.getMessage())
-                );*/
-
-            // } else if (messageText.startsWith(",channelcheck")) {
-
-            //     Guild guild = event.getGuild();
-            //     Role role = guild.getRoleById(1205225542882951300L);
-            //     TextChannel textChannel = guild.getTextChannelById(203282662608207872L);
-            //     VoiceChannel voiceChannel = guild.getVoiceChannelById(203282662608207874L);
-
-            //     PermissionOverride textPerms = textChannel.getPermissionOverride(role);
-            //     PermissionOverride voicePerms = voiceChannel.getPermissionOverride(role);
-
-            //     System.out.println("--TEXT ALLOW--");
-            //     for (Permission p : textPerms.getAllowed())
-            //         System.out.println(p);
-            //     System.out.println("--TEXT DENY--");
-            //     for (Permission p : textPerms.getDenied())
-            //         System.out.println(p);
-            //     System.out.println("--VOICE ALLOW--");
-            //     for (Permission p : voicePerms.getAllowed())
-            //         System.out.println(p);
-            //     System.out.println("--VOICE DENY--");
-            //     for (Permission p : voicePerms.getDenied())
-            //         System.out.println(p);
-
             } else if (messageText.startsWith(",channelroleadd")) {
 
                 //Variable setup
@@ -326,20 +297,6 @@ public class MessageEventListener extends ListenerAdapter {
                         ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(PermAssignDataType.ADD, roles, chan, allow, deny));
                     }
                 );
-
-                // Guild guild = event.getGuild();
-                // Role role = guild.getRoleById(1205225542882951300L);
-                // TextChannel channel = guild.getTextChannelById(203282662608207872L);
-                // TextChannelManager channelManager = channel.getManager();
-                // HashSet<Permission> allow = new HashSet<Permission>(Arrays.asList(Permission.MANAGE_THREADS));
-                // HashSet<Permission> deny = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_ATTACH_FILES));
-
-                // PermissionOverride permOverride = channel.getPermissionOverride(role);
-                
-                // System.out.println(permOverride.getAllowed());
-                // System.out.println(permOverride.getDenied());
-                // //permOverride.getAllowed();
-
             } else if (messageText.startsWith(",channelroleclear")) {
 
                 //Variable setup

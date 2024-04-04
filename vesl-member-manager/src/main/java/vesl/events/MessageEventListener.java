@@ -1,5 +1,6 @@
 package vesl.events;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,10 +17,18 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-
+import vesl.PermAssignDataPack;
+import vesl.PermAssignDataType;
 import vesl.tools.ParseTools;
 
 public class MessageEventListener extends ListenerAdapter {
+    private HashMap<String, PermAssignDataPack> ProcessCache;
+
+    public MessageEventListener(HashMap<String, PermAssignDataPack> pc) {
+        super();
+        ProcessCache = pc;
+    }
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         super.onMessageReceived(event);
@@ -34,6 +43,38 @@ public class MessageEventListener extends ListenerAdapter {
 
             if (messageText.startsWith(",help")) {
                 event.getChannel().sendMessage("You've entered ',help'\nThere is no help\n...Go home").queue();
+
+                for (int i = 0; i < 11; i++) {
+                    try {Thread.sleep(1000);} catch (InterruptedException e) {}
+                    System.out.println(i);
+                }
+
+            } else if (messageText.startsWith(",debugCachePrint")) {
+                ProcessCache.forEach((k, v) -> {
+                    System.out.println(k);
+                    System.out.println("TYPE: " + v.TYPE);
+                    System.out.println("\tROLES:");
+                    for (IPermissionHolder r : v.ROLES)
+                        System.out.println("\t\t" + r.toString());
+                    System.out.println("\tCHANNELS:");
+                    for (GuildChannel c : v.CHANNELS)
+                        System.out.println("\t\t" + c.getName() + "\t|\t" + c.getId());
+                    if (v.TYPE != PermAssignDataType.CLEAR) {
+                        System.out.println("\tALLOW:");
+                        for (Permission p : v.ALLOW)
+                            System.out.println("\t\t" + p);
+                        System.out.println("\tDENY:");
+                        for (Permission p : v.DENY)
+                            System.out.println("\t\t" + p);
+                    } else {
+                        System.out.println("\tPERMS:");
+                        for (Permission p : v.PERMS)
+                            System.out.println("\t\t" + p);
+                    }
+                    System.out.println("\tCREATED_AT:" + v.CREATED_AT);
+                });
+
+
             // } else if (messageText.startsWith(",debugparse")) {
             //     String output = "";
             //     output += "===== [ RESULTS  ] =====\n----- [  ROLES   ] -----\n";
@@ -114,7 +155,7 @@ public class MessageEventListener extends ListenerAdapter {
                 //Switches channels around 
                 if(channelInverse) {
                     Set<GuildChannel> allChannels = new HashSet<GuildChannel>(guild.getChannels());
-                    for(GuildChannel c : allChannels)           //Removes all channels that are already synced to the category perms
+                    for(GuildChannel c : allChannels)          //new PermAssignDataPack(PermAssignDataType.SET, roles, channels, allow, deny) //Removes all channels that are already synced to the category perms
                         if(c.getType() == ChannelType.CATEGORY)
                             for(GuildChannel c2 : ((Category)c).getChannels())
                                 if (((ICategorizableChannel)c2).isSynced())
@@ -170,10 +211,16 @@ public class MessageEventListener extends ListenerAdapter {
                 Button confirmButton = Button.success("memberManagerConfirm", "Confirm").withEmoji(Emoji.fromFormatted("✔️"));
                 Button denyButton = Button.danger("memberMangerDeny", "Deny").withEmoji(Emoji.fromFormatted("✖️"));
 
+                //Need to do this for some reason???
+                final Set<GuildChannel> chan = new HashSet<GuildChannel>(channels);
+
                 //Compile message and reply to message
-                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue();
-                
-                
+                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue(
+                    (message) -> { 
+                        ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(PermAssignDataType.SET, roles, chan, allow, deny));
+                    }
+                );
+
                 /*permContainer.getManager().putPermissionOverride(permHolder, allow, deny).queue(
                     (success) -> System.out.println("Permission override created successfully."),
                     (error) -> System.out.println("Failed to create permission override: " + error.getMessage())
@@ -270,9 +317,15 @@ public class MessageEventListener extends ListenerAdapter {
                 Button confirmButton = Button.success("memberManagerConfirm", "Confirm").withEmoji(Emoji.fromFormatted("✔️"));
                 Button denyButton = Button.danger("memberMangerDeny", "Deny").withEmoji(Emoji.fromFormatted("✖️"));
 
-                //Compile message and reply to message
-                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue();
+                //Need to do this for some reason???
+                final Set<GuildChannel> chan = new HashSet<GuildChannel>(channels);
 
+                //Compile message and reply to message
+                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue(
+                    (message) -> { 
+                        ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(PermAssignDataType.ADD, roles, chan, allow, deny));
+                    }
+                );
 
                 // Guild guild = event.getGuild();
                 // Role role = guild.getRoleById(1205225542882951300L);
@@ -350,37 +403,21 @@ public class MessageEventListener extends ListenerAdapter {
                 Button confirmButton = Button.success("memberManagerConfirm", "Confirm").withEmoji(Emoji.fromFormatted("✔️"));
                 Button denyButton = Button.danger("memberMangerDeny", "Deny").withEmoji(Emoji.fromFormatted("✖️"));
 
+                //Need to do this for some reason???
+                final Set<GuildChannel> chan = new HashSet<GuildChannel>(channels);
+
                 //Compile message and reply to message
-                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue();
-
-                // Guild guild = event.getGuild();
-                // Role role = guild.getRoleById(1205225542882951300L);
-                // TextChannel channel = guild.getTextChannelById(203282662608207872L);
-                // TextChannelManager channelManager = channel.getManager();
-                // HashSet<Permission> permsToRemove = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_ATTACH_FILES));
-                // PermissionOverride permOverride = channel.getPermissionOverride(role);
-                // EnumSet<Permission> allowed = permOverride.getAllowed();
-                // EnumSet<Permission> denied = permOverride.getDenied();
-                // //EnumSet<Permission> currentPerms = EnumSet.copyOf(allowed);
-                // //currentPerms.addAll(denied);
-                
-                // allowed.removeAll(permsToRemove);
-                // denied.removeAll(permsToRemove);
-
-                // //channelManager.removePermissionOverride(role).queue();
-                // if (allowed.isEmpty() && denied.isEmpty())
-                //     channelManager.removePermissionOverride(role).queue();
-                // else
-                //     channelManager.putPermissionOverride(role, allowed, denied).queue();
-
-            //} else if (messageText.startsWith(",devreset")) {
+                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue(
+                    (message) -> { 
+                        ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(roles, chan, perms));
+                    }
+                );
 
             } else if (messageText.startsWith(",undo")) {
-
+                //TODO: Add undo functionality OR add undo button
             } else {
                 event.getChannel().sendMessage("Unrecognized command!\nType in ',help' to view available commands").queue();
             }
         }
     }
-
 }

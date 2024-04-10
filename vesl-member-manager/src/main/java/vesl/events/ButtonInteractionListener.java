@@ -5,7 +5,6 @@ import java.util.HashMap;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -47,13 +46,13 @@ public class ButtonInteractionListener extends ListenerAdapter {
                     break;
             }
             ProcessCache.remove(pID);
-            //TODO:Maybe change footer to reflect process has taken place instead of separate message?
-            EmbedBuilder embed = new EmbedBuilder().setTitle(Emoji.fromFormatted("✅").getFormatted() + " Success").addField(new Field("", "Successfully processed the attached command", false));
-            event.reply("").addEmbeds(embed.build()).queue();
+            MessageEmbed currentEmbed = event.getMessage().getEmbeds().get(0);
+            EmbedBuilder embed = new EmbedBuilder(currentEmbed).setFooter(Emoji.fromFormatted("✅").getFormatted() + " Successfully processed the command");
+            event.editMessageEmbeds(embed.build()).setComponents().queue();
         } else if (buttonSelection.equals("memberMangerDeny")) {
             ProcessCache.remove(pID);
             MessageEmbed currentEmbed = event.getMessage().getEmbeds().get(0);
-            EmbedBuilder embed = new EmbedBuilder(currentEmbed).setFooter("This process has alread been denied or expired. Please generate a new one");
+            EmbedBuilder embed = new EmbedBuilder(currentEmbed).setFooter("This process has already been denied or expired. Please generate a new one");
             event.editMessageEmbeds(embed.build()).setComponents().queue();
         }
     }

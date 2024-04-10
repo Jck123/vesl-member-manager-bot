@@ -33,6 +33,9 @@ public class MessageEventListener extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         super.onMessageReceived(event);
 
+        //Prunes processes that are 30 or more seconds older
+        ProcessCache.values().removeIf(v -> System.currentTimeMillis() - v.CREATED_AT > 30000);
+
         if (event.getAuthor().isBot()) return;
 
         String messageText = event.getMessage().getContentRaw();

@@ -21,6 +21,11 @@ public class ButtonInteractionListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
+        super.onButtonInteraction(event);
+        
+        //Prunes processes that are 30 or more seconds older
+        ProcessCache.values().removeIf(v -> System.currentTimeMillis() - v.CREATED_AT > 30000);
+
         String buttonSelection = event.getComponentId();
         String pID = event.getGuild().getId() + '-' + event.getMessageId();
         Guild guild = event.getGuild();

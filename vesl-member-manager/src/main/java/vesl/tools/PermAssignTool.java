@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.managers.channel.attribute.IPermissionContainerManager;
+import net.dv8tion.jda.api.requests.restaction.PermissionOverrideAction;
 
 public class PermAssignTool {
     @Deprecated
@@ -66,6 +67,9 @@ public class PermAssignTool {
         //return 0;
 
         permOverride.getManager().clear(perms).complete();
+        /*channel.getPermissionContainer().delete().queue();                                        //Removes all roles
+        permOverride.delete().queue();                                                            //Removes role specific
+        channel.getPermissionContainer().getManager().removePermissionOverride(role).queue();     //Removes role specific*/
 
         return 0;
     }
@@ -128,7 +132,17 @@ public class PermAssignTool {
             if (permContainer == null)
                 continue;
             for (IPermissionHolder r : roles) {
-                permContainer.upsertPermissionOverride(r).clear(perms).complete();
+                PermissionOverride permOverride = permContainer.getPermissionOverride(r);
+                if (permOverride == null)       //Skips if there is no perm override for user in channel
+                    continue;
+                
+                PermissionOverrideAction overrideAction = permContainer.upsertPermissionOverride(r).clear(perms);
+                if (overrideAction.getDenied() == 0 && overrideAction.getAllowed() == 0)
+                    permContainer.getManager().removePermissionOverride(r).complete();          //Checks if user perms are completely clear after clearing, if so, just delete entire container
+                    //overrideAction.reset();
+                else                                                                            //Otherwise, proceed submitting action
+                    overrideAction.complete();
+                    
             }
         }
 

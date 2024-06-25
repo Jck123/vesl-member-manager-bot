@@ -31,4 +31,11 @@ public class PermAssignDataPack {
         PERMS = p;
         CREATED_AT = System.currentTimeMillis();
     }
+
+    public PermAssignDataPack(Set<IPermissionHolder> r, Set<GuildChannel> c) {
+        TYPE = PermAssignDataType.CLEARALL;
+        ROLES = r;
+        CHANNELS = c;
+        CREATED_AT = System.currentTimeMillis();
+    }
 }

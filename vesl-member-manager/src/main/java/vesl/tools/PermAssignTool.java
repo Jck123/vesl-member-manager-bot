@@ -148,4 +148,29 @@ public class PermAssignTool {
 
         return 0;
     }
+
+    public static int permsAllClearAll(Guild guild, Set<IPermissionHolder> roles, Set<GuildChannel> channels) {
+        if (guild == null)
+            return -1;
+        if (roles == null || roles.isEmpty())
+            return -2;
+        if (channels == null || channels.isEmpty())
+            return -3;
+
+        for (GuildChannel c : channels) {
+            IPermissionContainer permContainer = c.getPermissionContainer();
+            if (permContainer == null)
+                 continue;
+            for (IPermissionHolder r : roles) {
+                //PermissionOverride permOverride = permContainer.getPermissionOverride(r);
+                permContainer.getManager().removePermissionOverride(r).complete();
+                // if (permOverride == null)       //Skips if there is no perm override for role in channel
+                //     continue;
+
+                // permContainer.getManager().removePermissionOverride(r).complete();
+            }
+        }
+        
+        return 0;
+    }
 }

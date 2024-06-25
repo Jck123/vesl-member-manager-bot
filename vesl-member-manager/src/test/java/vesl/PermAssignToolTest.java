@@ -776,7 +776,7 @@ public class PermAssignToolTest {
 
         //Error handling
         //Null Guild
-        assertEquals(-1, PermAssignTool.permsAddAll(null, null, null, null, null));
+        assertEquals(-1, PermAssignTool.permsClearAll(null, null, null, null));
 
         Thread.sleep(3000);
 
@@ -788,7 +788,7 @@ public class PermAssignToolTest {
         }
 
         //Null Role List
-        assertEquals(-2, PermAssignTool.permsAddAll(guild, null, null, null, null));
+        assertEquals(-2, PermAssignTool.permsClearAll(guild, null, null, null));
 
         Thread.sleep(3000);
 
@@ -800,7 +800,7 @@ public class PermAssignToolTest {
         }
 
         //Null Channel List
-        assertEquals(-3, PermAssignTool.permsAddAll(guild, roles, null, null, null));
+        assertEquals(-3, PermAssignTool.permsClearAll(guild, roles, null, null));
 
         Thread.sleep(3000);
 
@@ -812,8 +812,8 @@ public class PermAssignToolTest {
         }
 
 
-        //Null Allow AND Deny List
-        assertEquals(-4, PermAssignTool.permsAddAll(guild, roles, channels, null, null));
+        //Null Perms List
+        assertEquals(-4, PermAssignTool.permsClearAll(guild, roles, channels, null));
 
         Thread.sleep(3000);
         
@@ -824,6 +824,138 @@ public class PermAssignToolTest {
             }
         }
 
+
+        //Clean up and shut down
+        for (GuildChannel c : channels)
+            for (IPermissionHolder r : roles)
+                c.getPermissionContainer().getManager().removePermissionOverride(r).complete();
+        
+        Thread.sleep(3000);
+        jda.shutdownNow();
+    }
+
+    @Test
+    public void testPermsAllClearAll() throws InterruptedException {
+    
+        //Client setup
+        final String TOKEN = Json.createReader(App.class.getResourceAsStream(CREDENTIALS_DIRECTORY_PATH)).readObject().getString("api_key");
+        JDABuilder jdab = JDABuilder.createLight(TOKEN);
+        jdab.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        jdab.enableCache(CacheFlag.MEMBER_OVERRIDES);
+        JDA jda = jdab.build().awaitReady();
+        
+        //Object setup
+        Guild guild = jda.getGuildById(203282662608207872L);
+        
+        Role role1 = guild.getRoleById(1205225542882951300L);
+        Role role2 = guild.getRoleById(1217608439832776795L);
+        Member member = guild.retrieveMemberById(1137409049269391490L).complete();
+
+        TextChannel textChannel1 = guild.getTextChannelById(1230586192848752762L);
+        TextChannel textChannel2 = guild.getTextChannelById(217766003449397248L);
+        VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+
+        Set<IPermissionHolder> roles = new HashSet<IPermissionHolder>(Arrays.asList(role1, role2, member));
+        Set<GuildChannel> channels = new HashSet<GuildChannel>(Arrays.asList(textChannel1, textChannel2, voiceChannel));
+        Set<Permission> expectedAllow = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_MENTION_EVERYONE, Permission.CREATE_PRIVATE_THREADS, Permission.MESSAGE_SEND, Permission.VOICE_STREAM, Permission.MESSAGE_HISTORY, Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT));;
+        Set<Permission> expectedDeny = new HashSet<Permission>(Arrays.asList(Permission.MESSAGE_SEND_IN_THREADS, Permission.VOICE_SET_STATUS, Permission.CREATE_PUBLIC_THREADS, Permission.MESSAGE_ADD_REACTION, Permission.VOICE_USE_SOUNDBOARD, Permission.MANAGE_THREADS, Permission.MESSAGE_EXT_EMOJI, Permission.VOICE_SPEAK));
+        Set<Permission> actualAllow = null;
+        Set<Permission> actualDeny = null;
+
+        //Setting perms to set things up
+        for (GuildChannel c : channels)
+            for (IPermissionHolder r : roles) {
+                c.getPermissionContainer().getManager().putPermissionOverride(r, expectedAllow, expectedDeny).complete();
+            }
+
+        Thread.sleep(10000);
+
+        assertEquals(0, PermAssignTool.permsAllClearAll(guild, roles, channels));
+
+        Thread.sleep(15000);
+
+        for (GuildChannel c : channels) {
+            for (IPermissionHolder r : roles) {
+                assertNull(c.getPermissionContainer().getPermissionOverride(r));
+            }
+        }
+
+        //Resetting perms
+        for (GuildChannel c : channels)
+            for (IPermissionHolder r : roles) {
+                c.getPermissionContainer().getManager().putPermissionOverride(r, expectedAllow, expectedDeny).complete();
+            }
+
+        Thread.sleep(7000);
+
+        //Testing only specified channels are changing
+        Set<GuildChannel> channels1 = new HashSet<GuildChannel>(Arrays.asList(textChannel1, voiceChannel));
+        Set<GuildChannel> channels2 = new HashSet<GuildChannel>(channels);
+        channels2.removeAll(channels1);
+
+        assertEquals(0, PermAssignTool.permsAllClearAll(guild, roles, channels1));
+        
+        Thread.sleep(5000);
+
+        //Verify select channels were affected
+        for(GuildChannel c : channels1) {
+            for (IPermissionHolder r : roles) {
+                assertNull(c.getPermissionContainer().getPermissionOverride(r));
+            }
+        }
+
+        //Verify previous channel perms remained the same(only select channels were affected)
+        for (GuildChannel c : channels2) {
+            for (IPermissionHolder r : roles) {
+                actualAllow = c.getPermissionContainer().getPermissionOverride(r).getAllowed();
+                actualDeny = c.getPermissionContainer().getPermissionOverride(r).getDenied();
+
+                assertThat(actualAllow, is(expectedAllow));
+                assertThat(actualDeny, is(expectedDeny));
+            }
+        }
+        
+        //Resyncing perms
+        PermAssignTool.permsAllClearAll(guild, roles, channels2);
+
+        Thread.sleep(5000);
+
+        //Error handling
+        //Null Guild
+        assertEquals(-1, PermAssignTool.permsAllClearAll(null, null, null));
+
+        Thread.sleep(5000);
+
+        //Verify channels remained unchanged
+        for (GuildChannel c : channels) {
+            for (IPermissionHolder r : roles) {
+                assertNull(c.getPermissionContainer().getPermissionOverride(r));
+            }
+        }
+
+        //Null Role List
+        assertEquals(-2, PermAssignTool.permsAllClearAll(guild, null, null));
+
+        Thread.sleep(3000);
+
+        //Verify channels remained unchanged
+        for (GuildChannel c : channels) {
+            for (IPermissionHolder r : roles) {
+                assertNull(c.getPermissionContainer().getPermissionOverride(r));
+            }
+        }
+
+        //Null Channel List
+        assertEquals(-3, PermAssignTool.permsAllClearAll(guild, roles, null));
+
+        Thread.sleep(3000);
+
+        //Verify channels remained unchanged
+        for (GuildChannel c : channels) {
+            for (IPermissionHolder r : roles) {
+                assertNull(c.getPermissionContainer().getPermissionOverride(r));
+            }
+        }
 
         //Clean up and shut down
         for (GuildChannel c : channels)

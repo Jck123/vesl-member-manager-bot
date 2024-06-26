@@ -117,6 +117,7 @@ public class PermAssignTool {
         return 0;
     }
 
+    @SuppressWarnings({ "rawtypes" })
     public static int permsClearAll(Guild guild, Set<IPermissionHolder> roles, Set<GuildChannel> channels, Set<Permission> perms) {
         if (guild == null)
             return -1;
@@ -131,6 +132,7 @@ public class PermAssignTool {
             IPermissionContainer permContainer = c.getPermissionContainer();
             if (permContainer == null)
                 continue;
+            IPermissionContainerManager permContManager = permContainer.getManager();
             for (IPermissionHolder r : roles) {
                 PermissionOverride permOverride = permContainer.getPermissionOverride(r);
                 if (permOverride == null)       //Skips if there is no perm override for user in channel
@@ -138,17 +140,20 @@ public class PermAssignTool {
                 
                 PermissionOverrideAction overrideAction = permContainer.upsertPermissionOverride(r).clear(perms);
                 if (overrideAction.getDenied() == 0 && overrideAction.getAllowed() == 0)
-                    permContainer.getManager().removePermissionOverride(r).complete();          //Checks if user perms are completely clear after clearing, if so, just delete entire container
+                    permContManager.removePermissionOverride(r).complete();          //Checks if user perms are completely clear after clearing, if so, just delete entire container
                     //overrideAction.reset();
                 else                                                                            //Otherwise, proceed submitting action
                     overrideAction.complete();
                     
             }
+            permContManager.complete();
         }
 
         return 0;
     }
 
+
+    @SuppressWarnings({ "rawtypes" })
     public static int permsAllClearAll(Guild guild, Set<IPermissionHolder> roles, Set<GuildChannel> channels) {
         if (guild == null)
             return -1;
@@ -161,14 +166,11 @@ public class PermAssignTool {
             IPermissionContainer permContainer = c.getPermissionContainer();
             if (permContainer == null)
                  continue;
+            IPermissionContainerManager permContManager = permContainer.getManager();
             for (IPermissionHolder r : roles) {
-                //PermissionOverride permOverride = permContainer.getPermissionOverride(r);
-                permContainer.getManager().removePermissionOverride(r).complete();
-                // if (permOverride == null)       //Skips if there is no perm override for role in channel
-                //     continue;
-
-                // permContainer.getManager().removePermissionOverride(r).complete();
+                permContManager.removePermissionOverride(r);
             }
+            permContManager.complete();
         }
         
         return 0;

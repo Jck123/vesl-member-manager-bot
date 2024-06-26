@@ -49,6 +49,9 @@ public class ButtonInteractionListener extends ListenerAdapter {
                 case CLEAR:
                     PermAssignTool.permsClearAll(guild, data.ROLES, data.CHANNELS, data.PERMS);
                     break;
+                case CLEARALL:
+                    PermAssignTool.permsAllClearAll(guild, data.ROLES, data.CHANNELS);
+                    break;
             }
             ProcessCache.remove(pID);
             MessageEmbed currentEmbed = event.getMessage().getEmbeds().get(0);

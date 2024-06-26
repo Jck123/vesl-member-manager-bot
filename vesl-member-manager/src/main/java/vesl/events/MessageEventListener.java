@@ -194,10 +194,12 @@ public class MessageEventListener extends ListenerAdapter {
                     rolesClassList += r.getClass().getSimpleName().replace("Impl", "") + '\n';
                     rolesIdList += r.getId() + '\n';
                 }
-                for (Permission p : allow)
-                    allowList += p.getName() + '\n';
-                for (Permission p : deny)
-                    denyList += p.getName() + '\n';
+                if (allow != null)
+                    for (Permission p : allow)
+                        allowList += p.getName() + '\n';
+                if (deny != null)
+                    for (Permission p : deny)
+                        denyList += p.getName() + '\n';
 
                 confirmEmbedBuilder.setTitle("Setting Permissions...");
                 confirmEmbedBuilder.addField("Channels", channelsMentionList, true);
@@ -373,7 +375,76 @@ public class MessageEventListener extends ListenerAdapter {
                     }
                 );
 
-            } else if (messageText.startsWith(",undo")) {
+
+            } else if (messageText.startsWith(",channelrolefullclear")) {
+
+                //Variable setup
+                Guild guild = event.getGuild();
+                Set<GuildChannel> channels = ParseTools.parseChannels(messageText, guild);
+                Set<IPermissionHolder> roles = ParseTools.parseRoles(messageText, guild);
+
+                //Switches channels around 
+                if(channelInverse) {
+                    Set<GuildChannel> allChannels = new HashSet<GuildChannel>(guild.getChannels());
+                    for(GuildChannel c : allChannels)           //Removes all channels that are already synced to the category perms
+                        if(c.getType() == ChannelType.CATEGORY)
+                            for(GuildChannel c2 : ((Category)c).getChannels())
+                                if (((ICategorizableChannel)c2).isSynced())
+                                    channels.add(c2);
+
+                    allChannels.removeAll(channels);
+                    channels = allChannels;
+                    allChannels = null;
+                }
+
+                //Remove all threads(They do not have modifiable perms)
+                channels.removeIf(c -> c.getType() == ChannelType.GUILD_NEWS_THREAD || c.getType() == ChannelType.GUILD_PRIVATE_THREAD || c.getType() == ChannelType.GUILD_PUBLIC_THREAD);
+
+                //Print out parsed things and confirm if user wishes to proceed
+                EmbedBuilder confirmEmbedBuilder = new EmbedBuilder();
+                String channelsMentionList = "";
+                String channelsTypeList = "";
+                String channelsIdList = "";
+                String rolesNameList = "";
+                String rolesClassList = "";
+                String rolesIdList = "";
+
+                //TODO: Investigate using \t for separating channel and associated stats to fix misalignment issue
+                for(GuildChannel c : channels) {
+                    channelsMentionList += c.getAsMention() + '\n';
+                    channelsTypeList += c.getType().name() + '\n';
+                    channelsIdList += c.getId() + '\n';
+                }
+                for (IPermissionHolder r : roles) {
+                    rolesNameList += ((IMentionable)r).getAsMention() + '\n';
+                    rolesClassList += r.getClass().getSimpleName().replace("Impl", "") + '\n';
+                    rolesIdList += r.getId() + '\n';
+                }
+
+                confirmEmbedBuilder.setTitle("Clearing All Permissions...");
+                confirmEmbedBuilder.addField("Channels", channelsMentionList, true);
+                confirmEmbedBuilder.addField("", channelsTypeList, true);
+                confirmEmbedBuilder.addField("", channelsIdList, true);
+                confirmEmbedBuilder.addField("Roles/Users", rolesNameList, true);
+                confirmEmbedBuilder.addField("", rolesClassList, true);
+                confirmEmbedBuilder.addField("", rolesIdList, true);
+                confirmEmbedBuilder.setFooter("Please confirm you'd like to make these changes by clicking below" + Emoji.fromFormatted("⬇️").getFormatted());
+
+                //Create buttons and add to reply
+                Button confirmButton = Button.success("memberManagerConfirm", "Confirm").withEmoji(Emoji.fromFormatted("✔️"));
+                Button denyButton = Button.danger("memberMangerDeny", "Deny").withEmoji(Emoji.fromFormatted("✖️"));
+
+                //Need to do this for some reason???
+                final Set<GuildChannel> chan = new HashSet<GuildChannel>(channels);
+
+                //Compile message and reply to message
+                event.getMessage().replyEmbeds(confirmEmbedBuilder.build()).addActionRow(confirmButton, denyButton).setSuppressedNotifications(true).queue(
+                    (message) -> { 
+                        ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(roles, chan));
+                    }
+                );
+
+            //} else if (messageText.startsWith(",undo")) {
                 //TODO: Add undo functionality OR add undo button
             } else {
                 event.getChannel().sendMessage("Unrecognized command!\nType in ',help' to view available commands").queue();

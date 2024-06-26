@@ -146,7 +146,7 @@ public class MessageEventListener extends ListenerAdapter {
 
 
                 
-            } else if (messageText.startsWith(",channelroleset")) {
+            } else if (messageText.startsWith(",crset")) {
                 
                 //Variable setup
                 Guild guild = event.getGuild();
@@ -225,7 +225,7 @@ public class MessageEventListener extends ListenerAdapter {
                         ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(PermAssignDataType.SET, roles, chan, allow, deny));
                     }
                 );
-            } else if (messageText.startsWith(",channelroleadd")) {
+            } else if (messageText.startsWith(",cradd")) {
 
                 //Variable setup
                 Guild guild = event.getGuild();
@@ -302,7 +302,7 @@ public class MessageEventListener extends ListenerAdapter {
                         ProcessCache.put(guild.getId() + '-' + message.getId(), new PermAssignDataPack(PermAssignDataType.ADD, roles, chan, allow, deny));
                     }
                 );
-            } else if (messageText.startsWith(",channelroleclear")) {
+            } else if (messageText.startsWith(",crclear")) {
 
                 //Variable setup
                 Guild guild = event.getGuild();
@@ -376,7 +376,7 @@ public class MessageEventListener extends ListenerAdapter {
                 );
 
 
-            } else if (messageText.startsWith(",channelrolefullclear")) {
+            } else if (messageText.startsWith(",crfullclear")) {
 
                 //Variable setup
                 Guild guild = event.getGuild();

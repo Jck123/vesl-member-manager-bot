@@ -46,7 +46,7 @@ public class PermAssignToolTest {
         //Object setup
         Guild guild = jda.getGuildById(203282662608207872L);
         Role role = guild.getRoleById(1205225542882951300L);
-        TextChannel channel = guild.getTextChannelById(1230586192848752762L);
+        TextChannel channel = guild.getTextChannelById(1255645571876786366L);
         TextChannelManager channelManager = channel.getManager();
         Set<Permission> expectedAllow = null;
         Set<Permission> expectedDeny = null;
@@ -161,7 +161,7 @@ public class PermAssignToolTest {
         //Object setup
         Guild guild = jda.getGuildById(203282662608207872L);
         Role role = guild.getRoleById(1205225542882951300L);
-        TextChannel channel = guild.getTextChannelById(1230586192848752762L);
+        TextChannel channel = guild.getTextChannelById(1255645709139443783L);
         TextChannelManager channelManager = channel.getManager();
         Set<Permission> expectedAllow = null;
         Set<Permission> expectedDeny = null;
@@ -271,9 +271,9 @@ public class PermAssignToolTest {
         Role role2 = guild.getRoleById(1217608439832776795L);
         Member member = guild.retrieveMemberById(1137409049269391490L).complete();
 
-        TextChannel textChannel1 = guild.getTextChannelById(1230586192848752762L);
-        TextChannel textChannel2 = guild.getTextChannelById(217766003449397248L);
-        VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+        TextChannel textChannel1 = guild.getTextChannelById(1255645954351169586L);
+        TextChannel textChannel2 = guild.getTextChannelById(1255645983644319844L);
+        VoiceChannel voiceChannel = guild.getVoiceChannelById(1255646026405122078L);
 
         Set<IPermissionHolder> roles = new HashSet<IPermissionHolder>(Arrays.asList(role1, role2, member));
         Set<GuildChannel> channels = new HashSet<GuildChannel>(Arrays.asList(textChannel1, textChannel2, voiceChannel));
@@ -471,9 +471,9 @@ public class PermAssignToolTest {
         Role role2 = guild.getRoleById(1217608439832776795L);
         Member member = guild.retrieveMemberById(1137409049269391490L).complete();
 
-        TextChannel textChannel1 = guild.getTextChannelById(1230586192848752762L);
-        TextChannel textChannel2 = guild.getTextChannelById(217766003449397248L);
-        VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+        TextChannel textChannel1 = guild.getTextChannelById(1255646071187570788L);
+        TextChannel textChannel2 = guild.getTextChannelById(1255646102250848296L);
+        VoiceChannel voiceChannel = guild.getVoiceChannelById(1255646238926180382L);
 
         Set<IPermissionHolder> roles = new HashSet<IPermissionHolder>(Arrays.asList(role1, role2, member));
         Set<GuildChannel> channels = new HashSet<GuildChannel>(Arrays.asList(textChannel1, textChannel2, voiceChannel));
@@ -673,9 +673,9 @@ public class PermAssignToolTest {
         Role role2 = guild.getRoleById(1217608439832776795L);
         Member member = guild.retrieveMemberById(1137409049269391490L).complete();
 
-        TextChannel textChannel1 = guild.getTextChannelById(1230586192848752762L);
-        TextChannel textChannel2 = guild.getTextChannelById(217766003449397248L);
-        VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+        TextChannel textChannel1 = guild.getTextChannelById(1255647072905068555L);
+        TextChannel textChannel2 = guild.getTextChannelById(1255647098762690772L);
+        VoiceChannel voiceChannel = guild.getVoiceChannelById(1255647142949945484L);
 
         Set<IPermissionHolder> roles = new HashSet<IPermissionHolder>(Arrays.asList(role1, role2, member));
         Set<GuildChannel> channels = new HashSet<GuildChannel>(Arrays.asList(textChannel1, textChannel2, voiceChannel));
@@ -772,7 +772,7 @@ public class PermAssignToolTest {
         //Resyncing perms
         PermAssignTool.permsClearAll(guild, roles, channels2, inputPerms2);
 
-        Thread.sleep(3000);
+        Thread.sleep(7000);
 
         //Error handling
         //Null Guild
@@ -851,9 +851,9 @@ public class PermAssignToolTest {
         Role role2 = guild.getRoleById(1217608439832776795L);
         Member member = guild.retrieveMemberById(1137409049269391490L).complete();
 
-        TextChannel textChannel1 = guild.getTextChannelById(1230586192848752762L);
-        TextChannel textChannel2 = guild.getTextChannelById(217766003449397248L);
-        VoiceChannel voiceChannel = guild.getVoiceChannelById(1203035987802988585L);
+        TextChannel textChannel1 = guild.getTextChannelById(1255647191884763287L);
+        TextChannel textChannel2 = guild.getTextChannelById(1255647227397804133L);
+        VoiceChannel voiceChannel = guild.getVoiceChannelById(1255647269844287522L);
 
         Set<IPermissionHolder> roles = new HashSet<IPermissionHolder>(Arrays.asList(role1, role2, member));
         Set<GuildChannel> channels = new HashSet<GuildChannel>(Arrays.asList(textChannel1, textChannel2, voiceChannel));
